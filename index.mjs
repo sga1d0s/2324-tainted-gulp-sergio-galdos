@@ -3,7 +3,7 @@ import { getData } from "./service.mjs";
 import Ingredients from "./ingredients.mjs";
 import Cauldron from "./cauldron.mjs";
 
-// funciĆ³n principal
+// función principal
 const execute = async () => {
   try {
     const data = await getData();
