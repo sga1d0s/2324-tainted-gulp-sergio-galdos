@@ -1,62 +1,71 @@
-// imports
 import { getData } from "./service.mjs";
 import Ingredients from "./ingredients.mjs";
 import Cauldron from "./cauldron.mjs";
+import PotionBag from './PotionBag.mjs';
 
-// función principal
+// URL para el JSON de Joseph
+const josephUrl = 'https://gist.githubusercontent.com/oscar1771/3f27e083e980d9d8357294c2d7387fc0/raw/0296abf13d206454d18f88d8283c114be8d96d2e/joseph.json';
+
+// Función para obtener los datos de Joseph
+const getJosephData = async () => {
+  try {
+    const response = await fetch(josephUrl);
+    return response.json();
+  } catch (error) {
+    console.log("Error al obtener los datos de Joseph", error);
+  }
+};
+
 const execute = async () => {
   try {
-    const data = await getData();
+    // Obtener datos de ingredientes y Joseph
+    const ingredientsData = await getData();
+    const josephData = await getJosephData();
 
-    // crear los ingredientes
-    const ingredients = Ingredients.load(data);
+    // Imprimir los datos de Joseph para verificar
+    console.log("Datos de Joseph:", josephData);
 
-    // console.log(ingredients);
+    // Verificar que los datos de Joseph y sus bolsas existen
+    const joseph = josephData.players[0]; // Accedemos al primer jugador (Joseph)
 
-    // mostrar todos los ingredientes y sus efectos
-    showIngredients(ingredients);
+    if (!joseph || !joseph.pouch_yellow || joseph.pouch_yellow.length === 0) {
+      throw new Error("No se encontraron ingredientes en la bolsa roja de Joseph.");
+    }
 
-    // crear caldero de pociones
-    const cauldron = new Cauldron(ingredients)
+    // Crear los ingredientes
+    const ingredients = Ingredients.load(ingredientsData);
 
-    // crear las pociones
-    const potion1 = cauldron.createPotion("Bear Claws", "Bee");
-    showPotion(potion1);
+    // Crear caldero de pociones
+    const cauldron = new Cauldron(ingredients.ingredients);
 
-    const potion2 = cauldron.createPotion("Chicken's Egg", "Chaurus Eggs");
-    showPotion(potion2);
+    // Obtener ingredientes de la bolsa roja de Joseph
+    const josephPouch = joseph.pouch_yellow; // Usamos la bolsa roja
 
-    const potion3 = cauldron.createPotion("Chaurus Eggs", "Bleeding Crown");
-    showPotion(potion3);
+    // Filtrar los ingredientes disponibles
+    const josephIngredients = ingredients.ingredients.filter(ingredient =>
+      josephPouch.includes(ingredient.name)
+    );
 
-    const potion4 = cauldron.createPotion("Nightshade", "Ectoplasm");
-    showPotion(potion4);
+    // Crear la bolsa de pociones
+    const potionBag = PotionBag.create(josephIngredients, cauldron);
+
+    // Mostrar las pociones
+    showPotions(potionBag.potions);
 
   } catch (error) {
-    console.error("Error al crear ingredientes");
+    console.error("Error al crear ingredientes y pociones", error);
   }
 }
 
-function showPotion(potion) {
-  console.log(`${potion.name.toUpperCase()}`);
-  console.log(`Value:           ${potion.value}`);
-  console.log(`Weight:          ${potion.weight}`);
-  console.log(`Time:            ${potion.time}`);
-  console.log(`-------------------------------`);
-}
+function showPotions(potions) {
+  console.log("Lista de Pociones Creadas:");
 
-function showIngredients(ingredients) {
-  console.log("Lista de Ingredientes y sus Efectos:");
-
-  // Iteramos sobre el array de ingredientes
-  ingredients.ingredients.forEach(ingredient => {
-    console.log(`Ingrediente: ${ingredient.name}`);
-
-    // Iteramos sobre los efectos de cada ingrediente
-    ingredient.effects.forEach((effect, index) => {
-      console.log(`Efecto ${index + 1}: ${effect}`);
-    });
-    console.log('-------------------------');
+  potions.forEach(potion => {
+    console.log(`${potion.name}`);
+    console.log(`Value:           ${potion.value}`);
+    console.log(`Weight:          ${potion.weight.toFixed(2)}`);
+    console.log(`Time:            ${potion.time}`);
+    console.log('-------------------------------');
   });
 }
 
