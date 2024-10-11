@@ -5,7 +5,7 @@ class Cauldron {
   // constructor
   constructor(ingredients) {
     // accede directamente al array de ingredientes
-    this.ingredients = ingredients.ingredients; 
+    this.ingredients = ingredients; 
   }
 
   // factoria que crea las pociones
