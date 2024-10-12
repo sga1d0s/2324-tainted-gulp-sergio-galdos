@@ -13,5 +13,14 @@ const getData = async () => {
   }
 }
 
-export {getData};
-// export default getData;
+// Función para obtener los datos de Joseph
+const getJosephData = async () => {
+  try {
+    const response = await fetch("https://gist.githubusercontent.com/oscar1771/3f27e083e980d9d8357294c2d7387fc0/raw/0296abf13d206454d18f88d8283c114be8d96d2e/joseph.json");
+    return response.json();
+  } catch (error) {
+    console.log("Error al obtener los datos de Joseph", error);
+  }
+};
+
+export {getData, getJosephData};
